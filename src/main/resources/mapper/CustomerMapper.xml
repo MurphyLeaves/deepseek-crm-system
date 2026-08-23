@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lestcrm.deepseekcrmsystem.mapper.CustomerMapper">
+
+    <!-- 统计总数（去重） -->
+    <select id="countCustomerWithFilters" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT c.id)
+        FROM customer c
+        LEFT JOIN customer_label cl ON c.id = cl.customer_id
+        LEFT JOIN label l ON cl.label_id = l.id
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (
+            c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            OR c.contact_person LIKE CONCAT('%', #{keyword}, '%')
+            OR l.name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="industry != null and industry != ''">
+            AND c.industry = #{industry}
+        </if>
+        <if test="employeeScale != null and employeeScale != ''">
+            AND c.employee_scale = #{employeeScale}
+        </if>
+    </select>
+
+    <!-- 分页查询客户ID列表（去重，按创建时间降序） -->
+    <select id="selectCustomerIdsByFilters" resultType="java.lang.Long">
+        SELECT c.id
+        FROM customer c
+        LEFT JOIN customer_label cl ON c.id = cl.customer_id
+        LEFT JOIN label l ON cl.label_id = l.id
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (
+            c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            OR c.contact_person LIKE CONCAT('%', #{keyword}, '%')
+            OR l.name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="industry != null and industry != ''">
+            AND c.industry = #{industry}
+        </if>
+        <if test="employeeScale != null and employeeScale != ''">
+            AND c.employee_scale = #{employeeScale}
+        </if>
+        GROUP BY c.id
+        ORDER BY MAX(c.create_time) DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+</mapper>

@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: deepseek-crm-system
+
+  datasource:
+    # driver-class-name 可以删掉，Spring Boot 会自动识别 MySQL
+    url: jdbc:mysql://localhost:3306/crm_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    username: root
+    # 本地数据库密码通过环境变量注入,避免提交到 GitHub 泄露(本地运行时自行 export DB_PASSWORD)
+    password: ${DB_PASSWORD}
+
+# 【改动1】将 mybatis 改为 mybatis-plus，并增加日志输出（便于调试）
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.lestcrm.deepseekcrmsystem.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 控制台打印 SQL，调试时很有用
+
+# 【改动2】新增 DeepSeek API 配置（必须添加）
+deepseek:
+  api:
+    url: https://api.deepseek.com/chat/completions
+    # 这里填写你在 DeepSeek 开放平台申请的 API Key
+    key: ${DEEPSEEK_API_KEY}
+    model: deepseek-v4-flash
+    timeout: 60
+
+# 日志级别（保留）
+logging:
+  level:
+    com.lestcrm.deepseekcrmsystem: debug

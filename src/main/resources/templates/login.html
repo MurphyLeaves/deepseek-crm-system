@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - B端客户标注与智能评估系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 380px;
+        }
+        .login-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .login-container .subtitle {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: #fde8e8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>📊 B端客户标注系统</h2>
+    <p class="subtitle">基于Spring Boot + DeepSeek</p>
+
+    <!-- 错误提示（如果有） -->
+    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+
+    <form method="post" action="/login">
+        <div class="form-group">
+            <label for="usernameInput">用户名</label>
+            <input type="text" id="usernameInput" name="username" placeholder="请输入用户名" required>
+        </div>
+        <div class="form-group">
+            <label for="passwordInput">密码</label>
+            <input type="password" id="passwordInput" name="password" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="btn-login">登 录</button>
+    </form>
+</div>
+</body>
+</html>

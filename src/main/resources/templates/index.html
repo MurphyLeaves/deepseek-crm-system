@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>系统主页</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; margin: 0; padding: 20px; background: #f5f7fa; }
+        .header { background: white; padding: 20px 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { color: #333; font-size: 22px; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-info span { color: #666; }
+        .logout-btn { color: #667eea; text-decoration: none; padding: 6px 16px; border: 1px solid #667eea; border-radius: 4px; transition: all 0.3s; }
+        .logout-btn:hover { background: #667eea; color: white; }
+        .content { margin-top: 20px; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>📊 B端客户标注与智能评估系统</h1>
+    <div class="user-info">
+        <span th:text="'欢迎，' + ${user.realName}"></span>
+        <a href="/logout" class="logout-btn">退出</a>
+    </div>
+</div>
+<div class="content">
+    <p style="font-size: 18px;">🎉 系统登录成功！</p>
+    <p style="margin-top: 10px; font-size: 14px;">接下来我们将逐步开发客户管理、标签标注、智能评估等功能</p>
+</div>
+</body>
+</html>
