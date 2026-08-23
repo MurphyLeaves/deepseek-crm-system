@@ -1,13 +1,10 @@
-import axios from 'axios'
-
-const BASE_URL = 'http://localhost:8080'
+import request from './request'
 
 /**
  * 下载导入模板
  */
 export const downloadTemplate = () => {
-  return axios.get(BASE_URL + '/api/import-export/template', {
-    withCredentials: true,
+  return request.get('/api/import-export/template', {
     responseType: 'blob',
   })
 }
@@ -18,8 +15,7 @@ export const downloadTemplate = () => {
 export const importCustomers = (file) => {
   const formData = new FormData()
   formData.append('file', file)
-  return axios.post(BASE_URL + '/api/import-export/import', formData, {
-    withCredentials: true,
+  return request.post('/api/import-export/import', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -30,9 +26,8 @@ export const importCustomers = (file) => {
  * 导出客户数据（支持当前筛选条件）
  */
 export const exportCustomers = (params) => {
-  return axios.get(BASE_URL + '/api/import-export/export', {
+  return request.get('/api/import-export/export', {
     params: params,
-    withCredentials: true,
     responseType: 'blob',
   })
 }

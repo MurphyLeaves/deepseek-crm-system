@@ -35,7 +35,7 @@ src/
 
 ## 本地运行
 
-后端默认地址为 `http://localhost:8080`（各 api 文件中配置）。
+后端地址统一在 `src/api/request.js` 中配置(读取 `VITE_API_BASE_URL` 环境变量，默认 `http://localhost:8080`)，所有接口共用该实例，无需逐文件修改。
 
 ```sh
 npm install

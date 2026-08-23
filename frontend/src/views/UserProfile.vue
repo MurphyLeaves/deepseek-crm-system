@@ -131,7 +131,7 @@
 <script>
 import { message, Modal } from 'ant-design-vue'
 import { getUserList, updatePassword } from '../api/user'
-import axios from 'axios'
+import request from '../api/request'
 
 export default {
   data() {
@@ -159,8 +159,8 @@ export default {
     },
 
     loadUserInfo() {
-      axios
-        .get('http://localhost:8080/api/user/info', { withCredentials: true })
+      request
+        .get('/api/user/info')
         .then((res) => {
           if (res.data.code === 200) {
             this.currentUser = res.data.data

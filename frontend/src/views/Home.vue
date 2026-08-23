@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import request from '../api/request'
 
 export default {
   name: 'Home',
@@ -45,9 +45,7 @@ export default {
   methods: {
     async getUserInfo() {
       try {
-        const response = await axios.get('http://localhost:8080/api/user/info', {
-          withCredentials: true,
-        })
+        const response = await request.get('/api/user/info')
         if (response.data.code === 200) {
           this.userInfo = response.data.data
         } else {
@@ -61,7 +59,7 @@ export default {
       }
     },
     async handleLogout() {
-      await axios.post('http://localhost:8080/api/logout', {}, { withCredentials: true })
+      await request.post('/api/logout', {})
       this.$router.push('/login')
     },
   },

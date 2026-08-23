@@ -1,9 +1,5 @@
-import axios from 'axios'
-
-const BASE_URL = 'http://localhost:8080'
+import request from './request'
 
 export const getDashboardStats = () => {
-  return axios.get(BASE_URL + '/api/dashboard/stats', {
-    withCredentials: true,
-  })
+  return request.get('/api/dashboard/stats')
 }

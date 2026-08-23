@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import request from '../api/request'
 
 export default {
   name: 'Login',
@@ -43,9 +43,7 @@ export default {
       this.loading = true
       this.errorMsg = ''
       try {
-        const response = await axios.post('http://localhost:8080/api/login', this.loginForm, {
-          withCredentials: true, // 允许携带cookie
-        })
+        const response = await request.post('/api/login', this.loginForm)
         if (response.data.code === 200) {
           // 登录成功，跳转到主页
           this.$router.push('/home')

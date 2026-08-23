@@ -1,14 +1,10 @@
-import axios from 'axios'
-
-const BASE_URL = 'http://localhost:8080'
+import request from './request'
 
 /**
  * 获取当前AI评估提示词
  */
 export const getPrompt = () => {
-  return axios.get(`${BASE_URL}/api/config/prompt`, {
-    withCredentials: true,
-  })
+  return request.get('/api/config/prompt')
 }
 
 /**
@@ -16,8 +12,7 @@ export const getPrompt = () => {
  * @param {string} prompt - 新的提示词内容
  */
 export const updatePrompt = (prompt) => {
-  return axios.put(`${BASE_URL}/api/config/prompt`, prompt, {
+  return request.put('/api/config/prompt', prompt, {
     headers: { 'Content-Type': 'application/json' },
-    withCredentials: true,
   })
 }
