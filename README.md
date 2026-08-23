@@ -1,10 +1,11 @@
 # B端客户标注与智能评估系统（DeepSeek 版）
 
-基于 **Spring Boot + MyBatis-Plus + MySQL + DeepSeek API** 的 B 端客户管理、标签标注与 AI 智能评估系统（本科毕业论文项目，前后端分离架构，本仓库包含后端完整实现）。
+基于 **Spring Boot + MyBatis-Plus + MySQL + DeepSeek API + Vue 3** 的 B 端客户管理、标签标注与 AI 智能评估系统（本科毕业论文项目，前后端分离架构，本仓库包含后端完整实现与前端源码）。
 
 ## 技术栈
 
 - **后端**：Spring Boot 3.x / Java 17 + MyBatis-Plus + MySQL 8.0
+- **前端**：Vue 3.5 + Vite + Ant Design Vue 4 + Pinia + Vue Router + ECharts 6（见 `frontend/`）
 - **AI 集成**：DeepSeek API（`deepseek-chat`），评估结果持久化缓存 + 强制刷新 + 动态提示词
 - **认证**：BCrypt 密码加密 + Session 会话
 
@@ -23,13 +24,18 @@
 ## 目录结构
 
 ```
-src/main/java/com/lestcrm/
+src/main/java/com/lestcrm/     # 后端
 ├── controller/    # REST 接口（Customer/Label/Evaluation/Dashboard/ImportExport/Login/Config）
 ├── service/       # 业务逻辑（CustomerServiceImpl/LabelServiceImpl/ImportExportServiceImpl 等）
 ├── mapper/        # MyBatis-Plus Mapper
 ├── entity/        # 实体（Customer/CustomerLabel/Label/User/SysConfig）
 ├── dto/           # 请求/响应 DTO（CustomerQueryDTO/CustomerSaveDTO/CustomerEvaluationDTO 等）
 └── config/        # 配置（MyBatisPlusConfig/CorsConfig/RestTemplateConfig）
+
+frontend/                        # 前端（Vue 3 单页应用，详见 frontend/README.md）
+├── src/api/       # 接口封装
+├── src/views/     # 页面（客户管理/标签/看板/登录/用户中心）
+└── ...
 ```
 
 资源文件：`src/main/resources/mapper/`（SQL 映射）、`templates/`（服务端页面模板）、`application.yaml`（配置）。
@@ -40,10 +46,18 @@ src/main/java/com/lestcrm/
 2. 配置环境变量：
    - `DB_PASSWORD`：数据库密码
    - `DEEPSEEK_API_KEY`：DeepSeek 开放平台 API Key
-3. 启动：
+3. 启动后端：
 
 ```bash
 ./mvnw spring-boot:run
+```
+
+4. 启动前端（另开终端）：
+
+```bash
+cd frontend
+npm install
+npm run dev      # 默认 http://localhost:5173
 ```
 
 ## 说明
