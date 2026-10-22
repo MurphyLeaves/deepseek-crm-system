@@ -39,7 +39,8 @@ public class CustomerServiceImpl implements CustomerService {
         Long total = customerMapper.countCustomerWithFilters(
                 queryDTO.getKeyword(),
                 queryDTO.getIndustry(),
-                queryDTO.getEmployeeScale()
+                queryDTO.getEmployeeScale(),
+                queryDTO.getLabelIds()
         );
 
         // 2. 计算偏移量
@@ -49,6 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
                 queryDTO.getKeyword(),
                 queryDTO.getIndustry(),
                 queryDTO.getEmployeeScale(),
+                queryDTO.getLabelIds(),
                 offset,
                 queryDTO.getSize()
         );
@@ -100,6 +102,19 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer getById(Long id) {
         return customerMapper.selectById(id);
+    }
+
+    @Override
+    public CustomerVO getDetailById(Long id) {
+        Customer customer = customerMapper.selectById(id);
+        if (customer == null) {
+            return null;
+        }
+        CustomerVO vo = new CustomerVO();
+        BeanUtils.copyProperties(customer, vo);
+        // 详情需要展示该客户已分配的标签
+        vo.setLabels(labelService.getLabelsByCustomerId(id));
+        return vo;
     }
 
     @Override

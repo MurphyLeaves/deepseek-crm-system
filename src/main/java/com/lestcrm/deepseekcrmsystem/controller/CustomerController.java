@@ -47,12 +47,15 @@ public class CustomerController {
     }
 
     /**
-     * 根据ID查询客户详情（用于编辑时回显数据）
+     * 根据ID查询客户详情（含已分配标签，用于详情展示与编辑回显）
      * GET /api/customers/{id}
      */
     @GetMapping("/{id}")
-    public Result<Customer> getById(@PathVariable Long id) {
-        Customer customer = customerService.getById(id);
+    public Result<CustomerVO> getById(@PathVariable Long id) {
+        CustomerVO customer = customerService.getDetailById(id);
+        if (customer == null) {
+            return Result.error("客户不存在");
+        }
         return Result.success(customer);
     }
 

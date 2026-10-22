@@ -28,4 +28,19 @@ public class Result<T> {
     public static <T> Result<T> error(String message) {
         return new Result<>(500, message, null);
     }
+
+    // 失败响应（自定义状态码，用于 401 未登录 / 403 无权限等场景）
+    public static <T> Result<T> error(Integer code, String message) {
+        return new Result<>(code, message, null);
+    }
+
+    // 未登录
+    public static <T> Result<T> unauthorized(String message) {
+        return new Result<>(401, message, null);
+    }
+
+    // 无权限
+    public static <T> Result<T> forbidden(String message) {
+        return new Result<>(403, message, null);
+    }
 }

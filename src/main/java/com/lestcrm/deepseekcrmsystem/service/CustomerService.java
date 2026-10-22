@@ -19,6 +19,9 @@ public interface CustomerService {
     // 根据ID查询客户
     Customer getById(Long id);
 
+    // 根据ID查询客户详情（包含已分配标签，用于详情展示与编辑回显）
+    CustomerVO getDetailById(Long id);
+
     // 根据ID删除客户
     boolean deleteById(Long id);
 

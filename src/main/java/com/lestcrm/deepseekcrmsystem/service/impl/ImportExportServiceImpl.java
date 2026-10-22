@@ -3,8 +3,10 @@ package com.lestcrm.deepseekcrmsystem.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lestcrm.deepseekcrmsystem.dto.ImportResultDTO;
 import com.lestcrm.deepseekcrmsystem.entity.Customer;
+import com.lestcrm.deepseekcrmsystem.entity.Label;
 import com.lestcrm.deepseekcrmsystem.mapper.CustomerMapper;
 import com.lestcrm.deepseekcrmsystem.service.ImportExportService;
+import com.lestcrm.deepseekcrmsystem.service.LabelService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +18,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ImportExportServiceImpl implements ImportExportService {
 
     // 【修改点 1】 改为构造器注入，摒弃字段注入
     private final CustomerMapper customerMapper;
+    private final LabelService labelService;
 
     @Autowired
-    public ImportExportServiceImpl(CustomerMapper customerMapper) {
+    public ImportExportServiceImpl(CustomerMapper customerMapper, LabelService labelService) {
         this.customerMapper = customerMapper;
+        this.labelService = labelService;
     }
+
+    /** 单次导入的记录数上限（与需求文档中的批量导入能力保持一致） */
+    private static final int MAX_IMPORT_ROWS = 1000;
 
     // ========== 导入模板列索引 ==========
     private static final int COL_COMPANY_NAME = 0;
@@ -82,6 +92,13 @@ public class ImportExportServiceImpl implements ImportExportService {
             Sheet sheet = workbook.getSheetAt(0);
             if (sheet == null) {
                 throw new RuntimeException("Excel文件为空");
+            }
+
+            // 单次导入条数上限校验：表头占一行，其余为数据行
+            int dataRowCount = sheet.getLastRowNum();
+            if (dataRowCount > MAX_IMPORT_ROWS) {
+                throw new IllegalArgumentException(
+                        "单次导入不能超过 " + MAX_IMPORT_ROWS + " 条记录，当前文件约 " + dataRowCount + " 条");
             }
 
             // 跳过表头（第0行），从第1行开始读取
@@ -168,6 +185,9 @@ public class ImportExportServiceImpl implements ImportExportService {
             // 重新计算总记录数
             result.setTotal(result.getSuccessCount() + result.getFailCount());
 
+        } catch (IllegalArgumentException e) {
+            // 业务校验类异常（如超过单次导入条数上限），原文透出便于前端提示
+            throw e;
         } catch (Exception e) {
             throw new Exception("解析Excel文件失败：" + e.getMessage());
         }
@@ -181,9 +201,11 @@ public class ImportExportServiceImpl implements ImportExportService {
             Sheet sheet = workbook.createSheet("客户数据");
 
             // 【修改点 2】 再次调用抽离的表头创建逻辑，完全复用，杜绝重复代码
+            // 第 10 列导出客户已分配的标签名称，便于线下按标签做二次分拣
             String[] headers = {
                     "企业名称", "联系人", "电话", "邮箱", "地址",
                     "行业", "企业规模", "客户来源", "备注",
+                    "标签",
                     "AI等级", "AI评分", "AI理由", "AI评估时间"
             };
             initSheetHeader(sheet, headers);
@@ -207,6 +229,13 @@ public class ImportExportServiceImpl implements ImportExportService {
 
             List<Customer> customers = customerMapper.selectList(wrapper);
 
+            // ---- 批量查询这些客户已分配的标签，拼成"标签1、标签2"的形式 ----
+            Map<Long, List<Label>> labelMap = Collections.emptyMap();
+            if (!customers.isEmpty()) {
+                List<Long> customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
+                labelMap = labelService.getLabelsByCustomerIds(customerIds);
+            }
+
             // ---- 填充数据 ----
             int rowNum = 1;
             for (Customer c : customers) {
@@ -220,15 +249,23 @@ public class ImportExportServiceImpl implements ImportExportService {
                 row.createCell(6).setCellValue(c.getEmployeeScale() != null ? c.getEmployeeScale() : "");
                 row.createCell(7).setCellValue(c.getSource() != null ? c.getSource() : "");
                 row.createCell(8).setCellValue(c.getRemark() != null ? c.getRemark() : "");
-                row.createCell(9).setCellValue(c.getAiPriorityLevel() != null ? c.getAiPriorityLevel() : "");
-                row.createCell(10).setCellValue(c.getAiPriorityScore() != null ? c.getAiPriorityScore().toString() : "");
-                row.createCell(11).setCellValue(c.getAiReason() != null ? c.getAiReason() : "");
+
+                // 第 10 列：已分配标签名称
+                String labelNames = labelMap.getOrDefault(c.getId(), Collections.emptyList())
+                        .stream()
+                        .map(Label::getName)
+                        .collect(Collectors.joining("、"));
+                row.createCell(9).setCellValue(labelNames);
+
+                row.createCell(10).setCellValue(c.getAiPriorityLevel() != null ? c.getAiPriorityLevel() : "");
+                row.createCell(11).setCellValue(c.getAiPriorityScore() != null ? c.getAiPriorityScore().toString() : "");
+                row.createCell(12).setCellValue(c.getAiReason() != null ? c.getAiReason() : "");
 
                 String evalTime = "";
                 if (c.getAiEvalTime() != null) {
                     evalTime = c.getAiEvalTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 }
-                row.createCell(12).setCellValue(evalTime);
+                row.createCell(13).setCellValue(evalTime);
             }
 
 

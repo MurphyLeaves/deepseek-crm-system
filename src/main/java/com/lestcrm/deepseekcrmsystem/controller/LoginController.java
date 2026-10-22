@@ -3,6 +3,7 @@ package com.lestcrm.deepseekcrmsystem.controller;
 import com.lestcrm.deepseekcrmsystem.dto.PasswordUpdateDTO;
 import com.lestcrm.deepseekcrmsystem.entity.User;
 import com.lestcrm.deepseekcrmsystem.service.UserService;
+import com.lestcrm.deepseekcrmsystem.utils.AuthUtils;
 import com.lestcrm.deepseekcrmsystem.utils.Result;  // 👈 添加 Result 类的导入
 import com.lestcrm.deepseekcrmsystem.dto.LoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,9 +69,13 @@ public class LoginController {
     /**
      * 获取所有用户列表（管理员功能）
      * GET /api/user/list
+     * 仅管理员可调用，普通用户返回 403
      */
     @GetMapping("/user/list")
-    public Result<List<User>> getUserList() {
+    public Result<List<User>> getUserList(HttpSession session) {
+        if (!AuthUtils.isAdmin(session)) {
+            return Result.forbidden("该功能仅管理员可用");
+        }
         List<User> users = userService.getAllUsers();
         return Result.success(users);
     }

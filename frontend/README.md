@@ -1,46 +1,38 @@
-# crm-frontend — 前端
+# crm-frontend
 
-B端客户标注与智能评估系统的 **Vue 3 前端**，与后端（`../` 根目录的 Spring Boot 工程）前后端分离。
+This template should help get you started developing with Vue 3 in Vite.
 
-## 技术栈
+## Recommended IDE Setup
 
-- **Vue 3.5** + Vite 8 + JavaScript
-- **Ant Design Vue 4** + Element Plus（组件库）
-- **Pinia**（状态管理）+ Vue Router（路由）
-- **ECharts 6**（数据看板图表）
-- **Axios**（HTTP 请求，`withCredentials` 携带 Session）
+[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-## 功能页面
+## Recommended Browser Setup
 
-| 页面 | 说明 |
-|------|------|
-| `Login.vue` | 登录（BCrypt + Session 认证） |
-| `Home.vue` | 系统主页 |
-| `CustomerList.vue` | 客户管理：CRUD、多标签组合筛选、分页 |
-| `LabelManage.vue` | 标签体系管理 |
-| `Dashboard.vue` | ECharts 数据看板 |
-| `UserProfile.vue` | 用户信息与密码修改 |
+- Chromium-based browsers (Chrome, Edge, Brave, etc.):
+  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
+  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
+- Firefox:
+  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
 
-## 目录结构
+## Customize configuration
 
-```
-src/
-├── api/          # 接口封装（customer/label/dashboard/evaluation/importExport/user/config）
-├── views/        # 页面组件
-├── components/   # 通用组件
-├── stores/       # Pinia 状态
-├── router/       # 路由配置
-└── assets/       # 静态资源
-```
+See [Vite Configuration Reference](https://vite.dev/config/).
 
-## 本地运行
-
-后端地址统一在 `src/api/request.js` 中配置(读取 `VITE_API_BASE_URL` 环境变量，默认 `http://localhost:8080`)，所有接口共用该实例，无需逐文件修改。
+## Project Setup
 
 ```sh
 npm install
-npm run dev      # 开发模式，默认 http://localhost:5173
-npm run build    # 构建产物输出到 dist/
 ```
 
-> 注意：需要先启动后端服务（见仓库根目录 README），并保证后端已开启 CORS（允许前端源）。
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
+```
+
+### Compile and Minify for Production
+
+```sh
+npm run build
+```

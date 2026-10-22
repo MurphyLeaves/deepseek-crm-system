@@ -45,8 +45,9 @@ export default {
       try {
         const response = await request.post('/api/login', this.loginForm)
         if (response.data.code === 200) {
-          // 登录成功，跳转到主页
-          this.$router.push('/home')
+          // 登录成功：优先回到被拦截前想访问的页面，否则进入首页
+          const redirect = this.$route.query.redirect
+          this.$router.push(redirect ? decodeURIComponent(redirect) : '/home')
         } else {
           this.errorMsg = response.data.message || '登录失败'
         }

@@ -15,7 +15,7 @@
       <div class="info-item">
         <span>当前用户：</span>{{ currentUser?.realName || currentUser?.username || '未登录' }}
       </div>
-      <div class="info-item"><span>用户角色：</span>{{ currentUser?.role || '普通用户' }}</div>
+      <div class="info-item"><span>用户角色：</span>{{ formatRole(currentUser?.role) }}</div>
     </div>
 
     <!-- 修改密码 -->
@@ -101,7 +101,7 @@
     </div>
 
     <!-- 用户列表（管理员可见） -->
-    <div class="info-card" v-if="currentUser?.role === 'ADMIN'">
+    <div class="info-card" v-if="isAdmin">
       <h3>👥 用户列表</h3>
       <table class="user-table">
         <thead>
@@ -117,7 +117,7 @@
             <td>{{ user.id }}</td>
             <td>{{ user.username }}</td>
             <td>{{ user.realName || '-' }}</td>
-            <td>{{ user.role || 'USER' }}</td>
+            <td>{{ formatRole(user.role) }}</td>
           </tr>
           <tr v-if="userList.length === 0">
             <td colspan="4" style="text-align: center; color: #999">暂无用户数据</td>
@@ -153,9 +153,29 @@ export default {
   mounted() {
     this.loadUserInfo()
   },
+  computed: {
+    /**
+     * 当前登录用户是否为管理员
+     * 数据库中 role 实际存储为小写 "admin"，这里统一转小写比较，
+     * 避免大小写不一致导致管理员也看不到用户列表。
+     */
+    isAdmin() {
+      return String(this.currentUser?.role || '').toLowerCase() === 'admin'
+    },
+  },
   methods: {
     goBack() {
-      window.location.href = '/home'
+      this.$router.push('/home')
+    },
+
+    /**
+     * 角色显示文案：admin -> 管理员，user -> 普通用户
+     */
+    formatRole(role) {
+      const value = String(role || '').toLowerCase()
+      if (value === 'admin') return '管理员'
+      if (value === 'user') return '普通用户'
+      return role || '普通用户'
     },
 
     loadUserInfo() {
@@ -164,13 +184,13 @@ export default {
         .then((res) => {
           if (res.data.code === 200) {
             this.currentUser = res.data.data
-            if (this.currentUser?.role === 'ADMIN') {
+            if (String(this.currentUser?.role || '').toLowerCase() === 'admin') {
               this.loadUserList()
             }
           }
         })
         .catch(() => {
-          this.currentUser = { realName: '用户', role: 'USER' }
+          this.currentUser = { realName: '用户', role: 'user' }
         })
     },
 

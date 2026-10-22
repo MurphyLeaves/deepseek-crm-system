@@ -31,19 +31,63 @@
           margin-bottom: 16px;
         "
       >
-        <h2 style="margin: 0">📋 客户管理</h2>
-        <a-button type="warning" size="middle" @click="openPromptDialog"> ⚙️ 提示词配置 </a-button>
+        <div style="display: flex; align-items: center; gap: 16px">
+          <a-button type="link" style="padding-left: 0" @click="$router.push('/home')">
+            ← 返回首页
+          </a-button>
+          <h2 style="margin: 0">📋 客户管理</h2>
+        </div>
+        <a-button
+          v-if="isAdmin"
+          type="warning"
+          size="middle"
+          @click="openPromptDialog"
+        >
+          ⚙️ 提示词配置
+        </a-button>
       </div>
 
-      <!-- 搜索栏 -->
+      <!-- 筛选条件区：关键词 + 行业 + 规模 + 多标签组合筛选 -->
       <a-space style="margin-bottom: 16px; flex-wrap: wrap">
         <a-input
           v-model:value="query.keyword"
-          placeholder="输入企业名称或联系人"
+          placeholder="企业名称 / 联系人 / 标签"
           allow-clear
-          style="width: 260px"
+          style="width: 220px"
+          @pressEnter="handleSearch"
         />
+        <a-select
+          v-model:value="query.industry"
+          show-search
+          allow-clear
+          placeholder="行业"
+          :options="industryOptions"
+          style="width: 150px"
+        />
+        <a-select
+          v-model:value="query.employeeScale"
+          placeholder="企业规模"
+          allow-clear
+          style="width: 150px"
+        >
+          <a-select-option v-for="item in scaleOptions" :key="item" :value="item">
+            {{ item }}
+          </a-select-option>
+        </a-select>
+        <a-select
+          v-model:value="query.labelIds"
+          mode="multiple"
+          placeholder="按标签筛选（可多选，需同时具备）"
+          allow-clear
+          :max-tag-count="2"
+          style="min-width: 240px"
+        >
+          <a-select-option v-for="label in allLabels" :key="label.id" :value="label.id">
+            {{ label.name }}
+          </a-select-option>
+        </a-select>
         <a-button type="primary" @click="handleSearch">搜索</a-button>
+        <a-button @click="handleReset">重置</a-button>
         <a-button type="primary" @click="openAddDialog">+ 新增客户</a-button>
         <!-- 在已有按钮后面追加 -->
         <a-button type="primary" @click="handleDownloadTemplate">📥 下载模板</a-button>
@@ -56,13 +100,23 @@
         :columns="columns"
         :data-source="tableData"
         :row-key="(record) => record.id"
-        :scroll="{ y: 'calc(100vh - 380px)' }"
+        :scroll="{ y: 'calc(100vh - 430px)' }"
         :pagination="false"
         bordered
       >
         <template #bodyCell="{ column, record }">
+          <!-- 电话列：脱敏展示，完整信息在「详情」中查看 -->
+          <template v-if="column.key === 'phone'">
+            <span>{{ maskPhone(record.phone) }}</span>
+          </template>
+
+          <!-- 邮箱列：脱敏展示 -->
+          <template v-else-if="column.key === 'email'">
+            <span>{{ maskEmail(record.email) }}</span>
+          </template>
+
           <!-- 标签列 -->
-          <template v-if="column.key === 'labels'">
+          <template v-else-if="column.key === 'labels'">
             <a-space wrap>
               <a-tag v-for="label in record.labels || []" :key="label.id" :color="label.color">
                 {{ label.name }}
@@ -116,6 +170,7 @@
           <!-- 操作列 -->
           <template v-else-if="column.key === 'action'">
             <a-space wrap>
+              <a-button type="link" size="small" @click="openDetailDrawer(record)">详情</a-button>
               <a-button type="link" size="small" @click="openEditDialog(record)">编辑</a-button>
               <a-button type="link" size="small" danger @click="handleDelete(record.id)"
                 >删除</a-button
@@ -262,6 +317,75 @@
           💡 支持的占位符：{companyName}、{industry}、{employeeScale}、{source}、{remark}
         </div>
       </a-modal>
+
+      <!-- 客户详情抽屉：展示完整信息（含未脱敏的联系方式与已分配标签） -->
+      <a-drawer
+        v-model:open="detailVisible"
+        title="客户详情"
+        placement="right"
+        :width="520"
+      >
+        <div v-if="detailData">
+          <!-- 基本信息 -->
+          <div class="detail-section">
+            <div class="detail-section-title">基本信息</div>
+            <div class="detail-row"><span>企业名称</span><b>{{ detailData.companyName || '-' }}</b></div>
+            <div class="detail-row"><span>联系人</span><div>{{ detailData.contactPerson || '-' }}</div></div>
+            <div class="detail-row"><span>电话</span><div>{{ detailData.phone || '-' }}</div></div>
+            <div class="detail-row"><span>邮箱</span><div>{{ detailData.email || '-' }}</div></div>
+            <div class="detail-row"><span>地址</span><div>{{ detailData.address || '-' }}</div></div>
+            <div class="detail-row"><span>行业</span><div>{{ detailData.industry || '-' }}</div></div>
+            <div class="detail-row"><span>企业规模</span><div>{{ detailData.employeeScale || '-' }}</div></div>
+            <div class="detail-row"><span>客户来源</span><div>{{ detailData.source || '-' }}</div></div>
+            <div class="detail-row"><span>备注</span><div>{{ detailData.remark || '-' }}</div></div>
+            <div class="detail-row">
+              <span>创建时间</span><div>{{ formatDateTime(detailData.createTime) }}</div>
+            </div>
+          </div>
+
+          <!-- 已分配标签 -->
+          <div class="detail-section">
+            <div class="detail-section-title">已分配标签</div>
+            <a-space wrap v-if="detailData.labels && detailData.labels.length">
+              <a-tag
+                v-for="label in detailData.labels"
+                :key="label.id"
+                :color="label.color"
+              >
+                {{ label.name }}
+              </a-tag>
+            </a-space>
+            <span v-else style="color: #bbb">暂未分配标签</span>
+          </div>
+
+          <!-- AI 评估结果 -->
+          <div class="detail-section">
+            <div class="detail-section-title">AI 评估结果</div>
+            <template v-if="detailData.aiPriorityLevel">
+              <div class="detail-row">
+                <span>优先级</span>
+                <a-tag
+                  :color="
+                    detailData.aiPriorityLevel === 'A'
+                      ? 'red'
+                      : detailData.aiPriorityLevel === 'B'
+                        ? 'orange'
+                        : 'blue'
+                  "
+                >
+                  {{ detailData.aiPriorityLevel }}级
+                </a-tag>
+              </div>
+              <div class="detail-row"><span>评分</span><div>{{ detailData.aiPriorityScore }} 分</div></div>
+              <div class="detail-row"><span>评估理由</span><div>{{ detailData.aiReason || '-' }}</div></div>
+              <div class="detail-row">
+                <span>评估时间</span><div>{{ formatDateTime(detailData.aiEvalTime) }}</div>
+              </div>
+            </template>
+            <span v-else style="color: #bbb">尚未评估</span>
+          </div>
+        </div>
+      </a-drawer>
     </a-card>
   </div>
 </template>
@@ -284,14 +408,28 @@ import {
 import { evaluateCustomer } from '../api/evaluation'
 import { getPrompt, updatePrompt } from '../api/config'
 import { downloadTemplate, importCustomers, exportCustomers } from '../api/importExport'
+import request from '../api/request'
 
 export default {
   data() {
     return {
-      query: { page: 1, size: 10, keyword: '' },
+      query: {
+        page: 1,
+        size: 10,
+        keyword: '',
+        industry: undefined,
+        employeeScale: undefined,
+        labelIds: [],
+      },
       tableData: [],
       total: 0,
       loadingMap: {}, // 控制每行 AI 评估按钮的加载状态
+
+      currentUser: null, // 当前登录用户，用于判断是否为管理员
+      scaleOptions: ['10人以下', '10-50人', '50-200人', '200-500人', '500人以上'],
+
+      detailVisible: false, // 客户详情抽屉
+      detailData: null,
 
       dialogVisible: false,
       dialogTitle: '新增客户',
@@ -322,29 +460,67 @@ export default {
     }
   },
   computed: {
+    /**
+     * 当前用户是否为管理员（数据库 role 为小写 admin，统一转小写比较）
+     */
+    isAdmin() {
+      return String(this.currentUser?.role || '').toLowerCase() === 'admin'
+    },
+
+    /**
+     * 行业候选项：取自当前已加载数据中出现过的行业，输入框仍可自由输入
+     */
+    industryOptions() {
+      const values = this.tableData.map((item) => item.industry).filter(Boolean)
+      return [...new Set(values)].map((value) => ({ value }))
+    },
+
     columns() {
       return [
-        { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+        { title: 'ID', dataIndex: 'id', key: 'id', width: 70 },
         { title: '企业名称', dataIndex: 'companyName', key: 'companyName' },
-        { title: '联系人', dataIndex: 'contactPerson', key: 'contactPerson' },
-        { title: '电话', dataIndex: 'phone', key: 'phone' },
-        { title: '行业', dataIndex: 'industry', key: 'industry' },
-        { title: '规模', dataIndex: 'employeeScale', key: 'employeeScale' },
+        { title: '联系人', dataIndex: 'contactPerson', key: 'contactPerson', width: 100 },
+        { title: '电话', key: 'phone', width: 130 },
+        { title: '邮箱', key: 'email', width: 170 },
+        { title: '行业', dataIndex: 'industry', key: 'industry', width: 110 },
+        { title: '规模', dataIndex: 'employeeScale', key: 'employeeScale', width: 110 },
         { title: '标签', key: 'labels', width: 160 },
         // ========== 新增：AI 评级列 ==========
         { title: 'AI评级', key: 'aiEval', width: 300 },
-        { title: '操作', key: 'action', width: 280 },
+        { title: '操作', key: 'action', width: 300 },
       ]
     },
   },
-  mounted() {
+  async mounted() {
     this.loadData()
+    this.loadAllLabels()
+    this.loadCurrentUser()
   },
   methods: {
+    // ===================== 登录用户 =====================
+    async loadCurrentUser() {
+      try {
+        const res = await request.get('/api/user/info')
+        if (res.data.code === 200) {
+          this.currentUser = res.data.data
+        }
+      } catch (e) {
+        console.error('获取当前用户失败', e)
+      }
+    },
+
     // ===================== 数据加载 =====================
     async loadData() {
       try {
-        const res = await getCustomerPage(this.query)
+        // 多标签筛选：把数组拼成逗号分隔的字符串传给后端
+        const params = { ...this.query }
+        if (params.labelIds && params.labelIds.length > 0) {
+          params.labelIds = params.labelIds.join(',')
+        } else {
+          delete params.labelIds
+        }
+
+        const res = await getCustomerPage(params)
         if (res.data.code === 200) {
           const records = res.data.data.records || []
           records.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
@@ -365,6 +541,32 @@ export default {
     handleSearch() {
       this.query.page = 1
       this.loadData()
+    },
+
+    // 重置全部筛选条件
+    handleReset() {
+      this.query.page = 1
+      this.query.keyword = ''
+      this.query.industry = undefined
+      this.query.employeeScale = undefined
+      this.query.labelIds = []
+      this.loadData()
+    },
+
+    // ===================== 客户详情 =====================
+    async openDetailDrawer(row) {
+      try {
+        const res = await getCustomerById(row.id)
+        if (res.data.code === 200) {
+          this.detailData = res.data.data
+          this.detailVisible = true
+        } else {
+          message.error(res.data.message || '获取客户详情失败')
+        }
+      } catch (e) {
+        message.error('获取客户详情失败，请检查后端')
+        console.error(e)
+      }
     },
 
     // ===================== AI 评估 =====================
@@ -646,10 +848,83 @@ export default {
         date.getDate(),
       ).padStart(2, '0')}`
     },
+
+    formatDateTime(dateStr) {
+      if (!dateStr) return '-'
+      const date = new Date(dateStr)
+      if (Number.isNaN(date.getTime())) return dateStr
+      const pad = (n) => String(n).padStart(2, '0')
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(
+        date.getHours(),
+      )}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+    },
+
+    /**
+     * 手机号脱敏：13812341234 -> 138****1234
+     * 位数不足 7 位时全部遮蔽，避免泄露
+     */
+    maskPhone(phone) {
+      if (!phone) return '-'
+      const value = String(phone)
+      if (value.length < 7) {
+        return '*'.repeat(value.length)
+      }
+      return `${value.slice(0, 3)}****${value.slice(-4)}`
+    },
+
+    /**
+     * 邮箱脱敏：zhangsan@example.com -> z*******@example.com
+     * 只保留用户名首字母，域名部分保留
+     */
+    maskEmail(email) {
+      if (!email) return '-'
+      const value = String(email)
+      const atIndex = value.indexOf('@')
+      if (atIndex <= 0) {
+        return '*'.repeat(value.length)
+      }
+      const name = value.slice(0, atIndex)
+      const domain = value.slice(atIndex)
+      if (name.length <= 1) {
+        return `*${domain}`
+      }
+      return `${name[0]}${'*'.repeat(name.length - 1)}${domain}`
+    },
   },
 }
 </script>
 
 <style scoped>
 /* 表格滚动条样式 */
+
+/* ===== 客户详情抽屉 ===== */
+.detail-section {
+  margin-bottom: 24px;
+}
+.detail-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+.detail-row > span {
+  flex: 0 0 84px;
+  color: #999;
+}
+.detail-row > div,
+.detail-row > b {
+  flex: 1;
+  word-break: break-all;
+}
 </style>

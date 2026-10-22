@@ -14,10 +14,12 @@ public interface CustomerMapper extends BaseMapper<Customer> {
 
     /**
      * 统计符合条件的客户总数（去重）
+     * labelIds 为多标签组合筛选条件：多个标签时要求客户同时拥有这些标签
      */
     Long countCustomerWithFilters(@Param("keyword") String keyword,
                                   @Param("industry") String industry,
-                                  @Param("employeeScale") String employeeScale);
+                                  @Param("employeeScale") String employeeScale,
+                                  @Param("labelIds") List<Long> labelIds);
 
     /**
      * 分页查询符合条件的客户ID列表（去重）
@@ -25,6 +27,7 @@ public interface CustomerMapper extends BaseMapper<Customer> {
     List<Long> selectCustomerIdsByFilters(@Param("keyword") String keyword,
                                           @Param("industry") String industry,
                                           @Param("employeeScale") String employeeScale,
+                                          @Param("labelIds") List<Long> labelIds,
                                           @Param("offset") long offset,
                                           @Param("limit") long limit);
 

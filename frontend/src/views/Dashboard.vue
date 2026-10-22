@@ -2,7 +2,10 @@
   <div class="dashboard-container">
     <!-- 头部 -->
     <div class="header">
-      <h2>📊 数据可视化看板</h2>
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="back-btn" @click="$router.push('/home')">← 返回首页</button>
+        <h2>📊 数据可视化看板</h2>
+      </div>
     </div>
 
     <!-- 统计卡片 -->
@@ -343,6 +346,18 @@ export default {
   margin: 0;
   font-weight: 500;
   color: #333;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.back-btn:hover {
+  color: #764ba2;
 }
 
 /* 统计卡片区 */

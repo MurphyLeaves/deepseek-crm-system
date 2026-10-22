@@ -1,0 +1,18 @@
+@echo off
+chcp 65001 >nul
+setlocal
+
+REM ============================================================
+REM  本地敏感配置模板
+REM  使用方法：把本文件复制一份，改名为 config.local.bat
+REM  然后把下面的值换成你自己的，config.local.bat 不会被提交到 Git
+REM ============================================================
+
+REM 本地 MySQL root 密码
+set "DB_PASSWORD=你的数据库密码"
+
+REM DeepSeek 开放平台 API Key（以 sk- 开头）
+set "DEEPSEEK_API_KEY=你的APIKey"
+
+REM 服务端口，默认 8080
+set "SERVER_PORT=8080"

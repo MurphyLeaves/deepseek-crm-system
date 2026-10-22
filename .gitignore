@@ -20,3 +20,7 @@ npm-debug.log*
 application-local.yaml
 application-local.yml
 application-local.properties
+
+# 本地启动脚本(内含数据库密码与 API Key,禁止提交)
+config.local.bat
+config.local.sh

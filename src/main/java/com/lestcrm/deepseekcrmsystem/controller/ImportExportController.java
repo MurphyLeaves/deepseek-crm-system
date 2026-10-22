@@ -66,6 +66,9 @@ public class ImportExportController {
             }
             ImportResultDTO result = importExportService.importCustomers(file);
             return Result.success(result);
+        } catch (IllegalArgumentException e) {
+            // 业务校验类异常（如超过单次导入条数上限），把原因直接反馈给用户
+            return Result.error(e.getMessage());
         } catch (Exception e) {
             // 【改进点 3】 用日志记录器替换 e.printStackTrace()
             // 参数化日志，记录详细异常栈，但是不直接返回给前端

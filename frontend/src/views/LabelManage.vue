@@ -1,5 +1,9 @@
 <template>
   <div style="padding: 20px">
+    <!-- 返回按钮 -->
+    <div style="margin-bottom: 12px">
+      <button class="back-btn" @click="$router.push('/home')">← 返回首页</button>
+    </div>
     <h2>🏷️ 标签库管理</h2>
 
     <!-- 搜索和新增 -->
@@ -278,3 +282,17 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.back-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.back-btn:hover {
+  color: #764ba2;
+}
+</style>

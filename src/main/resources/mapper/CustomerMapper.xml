@@ -2,48 +2,60 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lestcrm.deepseekcrmsystem.mapper.CustomerMapper">
 
+    <!--
+        统一的筛选条件片段
+        多标签组合筛选：客户必须同时拥有 labelIds 中的每一个标签，
+        因此用 GROUP BY + HAVING COUNT(DISTINCT label_id) = 标签个数 的方式判断，
+        只选中"全部命中"的客户 ID。
+    -->
+    <sql id="customerFilterConditions">
+        <if test="keyword != null and keyword != ''">
+            AND (
+            c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            OR c.contact_person LIKE CONCAT('%', #{keyword}, '%')
+            OR l.name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="industry != null and industry != ''">
+            AND c.industry = #{industry}
+        </if>
+        <if test="employeeScale != null and employeeScale != ''">
+            AND c.employee_scale = #{employeeScale}
+        </if>
+        <if test="labelIds != null and labelIds.size() > 0">
+            AND c.id IN (
+            SELECT cl2.customer_id
+            FROM customer_label cl2
+            WHERE cl2.label_id IN
+            <foreach collection="labelIds" item="labelId" open="(" separator="," close=")">
+                #{labelId}
+            </foreach>
+            GROUP BY cl2.customer_id
+            HAVING COUNT(DISTINCT cl2.label_id) = #{labelCount}
+            )
+        </if>
+    </sql>
+
     <!-- 统计总数（去重） -->
     <select id="countCustomerWithFilters" resultType="java.lang.Long">
+        <bind name="labelCount" value="labelIds == null ? 0 : labelIds.size()"/>
         SELECT COUNT(DISTINCT c.id)
         FROM customer c
         LEFT JOIN customer_label cl ON c.id = cl.customer_id
         LEFT JOIN label l ON cl.label_id = l.id
         WHERE 1=1
-        <if test="keyword != null and keyword != ''">
-            AND (
-            c.company_name LIKE CONCAT('%', #{keyword}, '%')
-            OR c.contact_person LIKE CONCAT('%', #{keyword}, '%')
-            OR l.name LIKE CONCAT('%', #{keyword}, '%')
-            )
-        </if>
-        <if test="industry != null and industry != ''">
-            AND c.industry = #{industry}
-        </if>
-        <if test="employeeScale != null and employeeScale != ''">
-            AND c.employee_scale = #{employeeScale}
-        </if>
+        <include refid="customerFilterConditions"/>
     </select>
 
     <!-- 分页查询客户ID列表（去重，按创建时间降序） -->
     <select id="selectCustomerIdsByFilters" resultType="java.lang.Long">
+        <bind name="labelCount" value="labelIds == null ? 0 : labelIds.size()"/>
         SELECT c.id
         FROM customer c
         LEFT JOIN customer_label cl ON c.id = cl.customer_id
         LEFT JOIN label l ON cl.label_id = l.id
         WHERE 1=1
-        <if test="keyword != null and keyword != ''">
-            AND (
-            c.company_name LIKE CONCAT('%', #{keyword}, '%')
-            OR c.contact_person LIKE CONCAT('%', #{keyword}, '%')
-            OR l.name LIKE CONCAT('%', #{keyword}, '%')
-            )
-        </if>
-        <if test="industry != null and industry != ''">
-            AND c.industry = #{industry}
-        </if>
-        <if test="employeeScale != null and employeeScale != ''">
-            AND c.employee_scale = #{employeeScale}
-        </if>
+        <include refid="customerFilterConditions"/>
         GROUP BY c.id
         ORDER BY MAX(c.create_time) DESC
         LIMIT #{offset}, #{limit}
