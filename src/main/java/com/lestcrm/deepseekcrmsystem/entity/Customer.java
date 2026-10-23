@@ -22,7 +22,7 @@ public class Customer {
     private String remark;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
-    // ========== 新增：AI 智能评估字段 ==========
+    // ========== AI 智能评估结果字段 ==========
     private String aiPriorityLevel;   // A/B/C
     private Integer aiPriorityScore;  // 1-10
     private String aiReason;          // 评估理由

@@ -67,7 +67,7 @@ public class LabelServiceImpl implements LabelService {
         return labelMapper.selectLabelsByCustomerId(customerId);
     }
 
-    // ========== 🔥 新增：批量查询多个客户的标签 ==========
+    // ========== 批量查询多个客户的标签 ==========
     @Override
     public Map<Long, List<Label>> getLabelsByCustomerIds(List<Long> customerIds) {
         if (CollectionUtils.isEmpty(customerIds)) {
@@ -80,7 +80,7 @@ public class LabelServiceImpl implements LabelService {
         List<CustomerLabel> relations = customerLabelMapper.selectList(wrapper);
 
         if (relations.isEmpty()) {
-            // 🔥 改进：为每个客户 ID 创建空列表，避免 toMap 可能的问题
+            // 为每个客户 ID 预置空列表，避免无标签的客户在映射结果中缺失
             Map<Long, List<Label>> resultMap = new HashMap<>();
             for (Long id : customerIds) {
                 resultMap.put(id, Collections.emptyList());
@@ -94,7 +94,7 @@ public class LabelServiceImpl implements LabelService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // 3. 🔥 改造点：使用 LambdaQueryWrapper + in 替代弃用的 selectBatchIds
+        // 3. 使用 LambdaQueryWrapper + in 替代已弃用的 selectBatchIds
         LambdaQueryWrapper<Label> labelWrapper = new LambdaQueryWrapper<>();
         labelWrapper.in(Label::getId, labelIds);
         List<Label> labels = labelMapper.selectList(labelWrapper);

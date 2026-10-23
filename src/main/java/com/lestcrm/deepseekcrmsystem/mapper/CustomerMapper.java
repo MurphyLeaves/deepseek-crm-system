@@ -31,7 +31,7 @@ public interface CustomerMapper extends BaseMapper<Customer> {
                                           @Param("offset") long offset,
                                           @Param("limit") long limit);
 
-    // ========== 以下为新增的3个统计方法 ==========
+    // ========== 看板统计查询 ==========
 
     /**
      * 获取近30天每天的客户增长数据

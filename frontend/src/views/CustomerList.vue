@@ -485,7 +485,7 @@ export default {
         { title: '行业', dataIndex: 'industry', key: 'industry', width: 110 },
         { title: '规模', dataIndex: 'employeeScale', key: 'employeeScale', width: 110 },
         { title: '标签', key: 'labels', width: 160 },
-        // ========== 新增：AI 评级列 ==========
+        // AI 评级列：显示等级、评分与评估理由
         { title: 'AI评级', key: 'aiEval', width: 300 },
         { title: '操作', key: 'action', width: 300 },
       ]

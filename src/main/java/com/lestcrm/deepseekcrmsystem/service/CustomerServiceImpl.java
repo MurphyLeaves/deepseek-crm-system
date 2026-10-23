@@ -23,7 +23,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerMapper customerMapper;
     private final CustomerLabelMapper customerLabelMapper;
-    private final LabelService labelService;   // 🔥 注入
+    private final LabelService labelService;
 
     public CustomerServiceImpl(CustomerMapper customerMapper,
                                CustomerLabelMapper customerLabelMapper,
@@ -86,7 +86,7 @@ public class CustomerServiceImpl implements CustomerService {
         return result;
     }
 
-    // ========== 其他方法保持不变 ==========
+    // ========== 单条查询与删除 ==========
 
     @Override
     public boolean saveCustomer(CustomerSaveDTO saveDTO) {

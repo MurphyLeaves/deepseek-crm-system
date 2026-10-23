@@ -4,13 +4,13 @@ import com.lestcrm.deepseekcrmsystem.dto.PasswordUpdateDTO;
 import com.lestcrm.deepseekcrmsystem.entity.User;
 import com.lestcrm.deepseekcrmsystem.service.UserService;
 import com.lestcrm.deepseekcrmsystem.utils.AuthUtils;
-import com.lestcrm.deepseekcrmsystem.utils.Result;  // 👈 添加 Result 类的导入
+import com.lestcrm.deepseekcrmsystem.utils.Result;
 import com.lestcrm.deepseekcrmsystem.dto.LoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
-import jakarta.servlet.http.HttpSession;  // 👈 注意这里改成了 jakart·a
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 import java.util.Map;

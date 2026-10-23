@@ -10,7 +10,7 @@ import com.lestcrm.deepseekcrmsystem.vo.CustomerVO;
 import java.util.List;
 
 public interface CustomerService {
-    // 🔥 分页查询（返回类型改为 PageResult<CustomerVO>）
+    // 分页查询，返回 PageResult<CustomerVO>
     PageResult<CustomerVO> getCustomerPage(CustomerQueryDTO queryDTO);
 
     // 新增客户

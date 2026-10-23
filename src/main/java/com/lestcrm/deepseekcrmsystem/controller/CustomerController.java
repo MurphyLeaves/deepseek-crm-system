@@ -17,7 +17,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    // 🔥 构造器注入（Spring 4.3+ 可省略 @Autowired）
+    // 构造器注入（Spring 4.3+ 可省略 @Autowired）
     public CustomerController(CustomerService customerService) {
         this.customerService = customerService;
     }

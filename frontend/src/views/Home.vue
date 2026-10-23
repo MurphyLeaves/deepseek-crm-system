@@ -67,7 +67,6 @@ export default {
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .home-container {
   font-family: 'Microsoft YaHei', sans-serif;
   padding: 20px;

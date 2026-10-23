@@ -50,7 +50,7 @@ public class DeepSeekService {
             throw new RuntimeException("客户不存在");
         }
 
-        // 2. 【核心改造点1】如果非强制刷新，且数据库已有评估结果，直接返回（省成本）
+        // 2. 非强制刷新且数据库中已有评估结果时直接返回，节省调用成本
         if (!forceRefresh && StringUtils.hasText(customer.getAiPriorityLevel())) {
             return buildDTOFromCustomer(customer);
         }
@@ -67,7 +67,7 @@ public class DeepSeekService {
         // 6. 解析 AI 返回的 JSON
         CustomerEvaluationDTO dto = parseAIResponse(aiResponse);
 
-        // 7. 【核心改造点2】将评估结果持久化到数据库
+        // 7. 将评估结果与评估时间写回客户表
         customer.setAiPriorityLevel(dto.getPriorityLevel());
         customer.setAiPriorityScore(dto.getPriorityScore());
         customer.setAiReason(dto.getReason());
