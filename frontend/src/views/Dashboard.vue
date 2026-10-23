@@ -461,7 +461,7 @@ export default {
 }
 </style>
 
-<!-- 🔥 必须保留的全局重置 -->
+<!-- 全局样式重置：ECharts 容器与弹窗依赖，不能删除 -->
 <style>
 html,
 body,

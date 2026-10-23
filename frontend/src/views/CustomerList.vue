@@ -144,7 +144,7 @@
                 </a-tag>
                 <span style="font-weight: bold">{{ record.aiPriorityScore }}分</span>
               </div>
-              <!-- ✅ 评估理由：自动换行，无截断 -->
+              <!-- 评估理由：自动换行，不截断 -->
               <div
                 style="
                   font-size: 12px;
