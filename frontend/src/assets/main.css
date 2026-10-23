@@ -1,9 +1,14 @@
 @import './base.css';
 
+/*
+ * 说明：以下内容原本是 create-vue 脚手架自带的模板样式，
+ * 包含 #app { max-width: 1280px }，以及 @media (min-width: 1024px) 下
+ * 把 #app 改成两列网格（grid-template-columns: 1fr 1fr）的规则。
+ * 后果是窗口宽度超过 1024px 时，整个应用被压进左半边、右侧出现大片空白。
+ * 本项目是整屏应用，不需要这些约束，已移除。
+ */
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  min-height: 100vh;
   font-weight: normal;
 }
 
@@ -18,18 +23,5 @@ a,
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
   }
 }

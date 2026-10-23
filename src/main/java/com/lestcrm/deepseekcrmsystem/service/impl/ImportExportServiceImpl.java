@@ -26,7 +26,8 @@ import java.util.stream.Collectors;
 @Service
 public class ImportExportServiceImpl implements ImportExportService {
 
-    // 【修改点 1】 改为构造器注入，摒弃字段注入
+    // 采用构造器注入：依赖在对象创建时即确定，避免字段注入带来的空依赖问题，
+    // 也便于测试时替换实现
     private final CustomerMapper customerMapper;
     private final LabelService labelService;
 
@@ -56,7 +57,7 @@ public class ImportExportServiceImpl implements ImportExportService {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("客户导入");
 
-            // 【修改点 2】 抽离重复的表头创建逻辑
+            // 表头单独抽成方法，供“下载模板”与“导出数据”两处复用，避免两处定义不一致
             String[] headers = {
                     "企业名称（必填）", "联系人", "电话", "邮箱",
                     "地址", "行业", "企业规模", "客户来源", "备注"
@@ -200,7 +201,7 @@ public class ImportExportServiceImpl implements ImportExportService {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("客户数据");
 
-            // 【修改点 2】 再次调用抽离的表头创建逻辑，完全复用，杜绝重复代码
+            // 复用同一套表头定义，保证导出列与下载模板始终对应
             // 第 10 列导出客户已分配的标签名称，便于线下按标签做二次分拣
             String[] headers = {
                     "企业名称", "联系人", "电话", "邮箱", "地址",

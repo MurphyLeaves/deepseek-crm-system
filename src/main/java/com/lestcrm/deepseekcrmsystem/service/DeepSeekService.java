@@ -155,16 +155,31 @@ public class DeepSeekService {
         }
 
         // 获取AI生成的内容
-        String content = deepSeekResponse.getChoices().get(0).getMessage().getContent();
+        DeepSeekResponse.Message message = deepSeekResponse.getChoices().get(0).getMessage();
+        String content = message.getContent();
+        // 兜底：推理模型在额度不足时正文为空，思考过程里可能已含 JSON
+        if (content == null || content.trim().isEmpty()) {
+            content = message.getReasoningContent();
+        }
+        if (content == null || content.trim().isEmpty()) {
+            throw new RuntimeException("模型未返回有效内容，请稍后重试");
+        }
 
         // 处理可能出现的 Markdown 代码块（如 ```json ... ```）
         String cleanContent = content
                 .replaceAll("```json", "")
                 .replaceAll("```", "")
                 .trim();
+        if (cleanContent.isEmpty()) {
+            throw new RuntimeException("模型返回内容为空，请稍后重试");
+        }
 
         // 解析内层JSON
         JSONObject jsonObject = JSON.parseObject(cleanContent);
+        if (jsonObject == null) {
+            String preview = cleanContent.length() > 120 ? cleanContent.substring(0, 120) : cleanContent;
+            throw new RuntimeException("模型返回内容不是合法JSON：" + preview);
+        }
 
         CustomerEvaluationDTO result = new CustomerEvaluationDTO();
         result.setPriorityLevel(jsonObject.getString("priorityLevel"));
